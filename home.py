@@ -39,6 +39,9 @@ def home_page():
 
         # find all users
         all_info = display_user_info()
+        if all_info is None:
+            st.info("No users found. Please add a new user.")
+            return
         
         # search bar
         col1, col2 = st.columns([3, 1])

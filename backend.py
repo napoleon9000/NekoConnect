@@ -75,6 +75,8 @@ def all_users_to_df():
 def display_user_info():
     display_keys = ['phone_number', 'name', 'credits', 'registration_date']
     all_users = all_users_to_df()
+    if all_users.empty:
+        return None
     return all_users[display_keys]
 
 # record redemption
