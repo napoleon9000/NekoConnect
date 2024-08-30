@@ -1,4 +1,6 @@
 nekoconnect_db.json
+users.yaml
+.streamlit/secrets.toml
 
 # Python-related
 __pycache__/
