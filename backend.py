@@ -53,13 +53,13 @@ class Manager:
         self.users_table.update(updates, UserQuery.phone_number == phone_number)
         self.db.save()
     # Delete a user
-    def delete_user(phone_number):
+    def delete_user(self, phone_number):
         UserQuery = Query()
         self.users_table.remove(UserQuery.phone_number == phone_number)
         self.db.save()
 
     # Find a user
-    def find_user(phone_number):
+    def find_user(self, phone_number):
         UserQuery = Query()
         return self.users_table.search(UserQuery.phone_number == phone_number)
 
