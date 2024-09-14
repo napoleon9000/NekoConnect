@@ -17,6 +17,7 @@ def app():
         if user:
             name = st.text_input("Name", value=user[0]['name'])
             credits = st.number_input("Credits", value=user[0]['credits'])
+            notes = st.text_area("Notes", value=user[0]['notes'])
             if st.button("Save"):
                 mgr.edit_user(phone_number, name=name, credits=credits)
                 st.success(f"User {phone_number} has been successfully updated!")
