@@ -5,6 +5,7 @@ import pandas as pd
 import uuid
 from typing import List
 from db import DB
+import json
 
 
 
@@ -22,6 +23,7 @@ class User:
     registration_date: str
     credits: int = 0
     name: str = ""
+    notes: str = ""
     redemption_history: List[Redemption] = None
     
     def __post_init__(self):
@@ -29,16 +31,16 @@ class User:
             self.redemption_history = []
 
 class Manager:
-    def __init__(self):
-        self.db = DB()
+    def __init__(self, env):
+        self.db = DB(env)
         self.users_table = self.db.table('users')
 
 
     # Create a new user
-    def create_user(self, phone_number, name=None):
+    def create_user(self, phone_number, name=None, credits=0, notes=""):
         registration_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         user_uuid = str(uuid.uuid4())
-        user = User(user_uuid, phone_number, registration_date, name=name)
+        user = User(user_uuid, phone_number, registration_date, name=name, credits=credits, notes=notes)
         self.users_table.insert(user.__dict__)
         self.db.save()
 
@@ -91,3 +93,9 @@ class Manager:
             updates = {'redemption_history': current_history, 'credits': new_credits}
             self.users_table.update(updates, UserQuery.phone_number == phone_number)
             self.db.save()
+
+    # download all data in json format
+    def download_all_data(self):
+        # Convert the entire database to JSON format
+        all_data = self.db.download_all_data()
+        return json.dumps(all_data, indent=2)

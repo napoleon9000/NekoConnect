@@ -2,8 +2,9 @@ import streamlit as st
 from backend import Manager
 
 def app():
+    env = st.secrets['ENV']['ENV']
     st.subheader("Add New User")
-    mgr = Manager()
+    mgr = Manager(env)
     phone_number = st.text_input("Phone Number")
     name = st.text_input("Name (Optional)")
     if st.button("Save"):

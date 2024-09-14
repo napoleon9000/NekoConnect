@@ -5,7 +5,8 @@ from utils import redemption_history_to_df
 def app():
 
     st.subheader("Edit User")
-    mgr = Manager()
+    env = st.secrets['ENV']['ENV']
+    mgr = Manager(env)
     if st.session_state['selected_user'] is not None:
         phone_number = st.session_state['selected_user']['phone_number']
         phone_number = st.text_input("Phone Number", value=phone_number)

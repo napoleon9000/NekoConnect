@@ -38,7 +38,8 @@ authenticator = Authenticate(
 name, authentication_status, username = authenticator.login(key='Login', location='main')
 
 if authentication_status:
-    mgr = Manager()
+    env = st_secrets['ENV']['ENV']
+    mgr = Manager(env)
 
     # init session state
     if 'selected_user' not in st.session_state:
@@ -57,7 +58,10 @@ if authentication_status:
         # Page functionality
             col1, col2 = st.columns([3, 1])
             with col1:
-                st.title("NekoConnect")
+                if env == 'dev':
+                    st.title(f"NekoConnect - {env}")
+                else:
+                    st.title(f"NekoConnect")
             with col2:
                 col3, col4 = st.columns([1, 1])
                 with col3:  
@@ -84,7 +88,17 @@ if authentication_status:
                 all_info = all_info[all_info['phone_number'] == search_phone]
             
             st.markdown("---")
-            
+            col1, col2, col3 = st.columns([1, 1, 5])
+            with col1:
+                st.button('Refresh')
+            with col2:
+                db_json = mgr.download_all_data()
+                st.download_button(
+                    label="Download data",
+                    data=db_json,
+                    file_name=f"nekoconnect_users_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.json",
+                    mime="application/json",
+                )
 
             def on_edit_click(index):
                 st.session_state['selected_user'] = all_info.iloc[index]
