@@ -1,5 +1,5 @@
 # Standard library imports
-import logging, yaml
+import copy, logging, yaml
 from yaml.loader import SafeLoader
 from datetime import datetime
 
@@ -7,17 +7,12 @@ from datetime import datetime
 import pandas as pd
 import streamlit as st
 from tinydb import TinyDB, Query
+from tinydb.storages import MemoryStorage
 from streamlit_authenticator import Authenticate
+from st_files_connection import FilesConnection
 
 # Local application imports
-from backend import (
-    create_user,
-    edit_user,
-    delete_user,
-    find_user,
-    record_redemption,
-    display_user_info
-)
+from backend import Manager
 from app_pages.edit_user import app as edit_user_page
 from app_pages.add_new_user import app as add_new_user_page
 
@@ -29,25 +24,21 @@ st.set_page_config(
     layout="wide",
     )
 
-st.write(st.secrets)
-
-credentials = dict(st.secrets['credentials'])
+st_secrets = dict(st.secrets)
+credentials = dict(st_secrets['credentials'])
 
 authenticator = Authenticate(
     credentials,
-    st.secrets['cookie']['name'],
-    st.secrets['cookie']['key'],
-    st.secrets['cookie']['expiry_days'],
-    st.secrets['preauthorized']
+    st_secrets['cookie']['name'],
+    st_secrets['cookie']['key'],
+    st_secrets['cookie']['expiry_days'],
+    st_secrets['preauthorized']
 )
 
 name, authentication_status, username = authenticator.login(key='Login', location='main')
 
 if authentication_status:
-
-    # Initialize the database
-    db = TinyDB('nekoconnect_db.json')
-    users_table = db.table('users')
+    mgr = Manager()
 
     # init session state
     if 'selected_user' not in st.session_state:
@@ -77,7 +68,7 @@ if authentication_status:
             st.markdown("### All Users")
 
             # find all users
-            all_info = display_user_info()
+            all_info = mgr.display_user_info()
             if all_info is None:
                 st.info("No users found. Please add a new user.")
                 return
@@ -102,7 +93,7 @@ if authentication_status:
 
             def on_delete_click(index):
                 phone_number = all_info.iloc[index]['phone_number']
-                delete_user(phone_number)
+                mgr.delete_user(phone_number)
 
             for index, row in all_info.iterrows():
                 col1, col2, col3 = st.columns([5, 1, 1])
