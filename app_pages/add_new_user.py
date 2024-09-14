@@ -7,10 +7,10 @@ def app():
     mgr = Manager(env)
     phone_number = st.text_input("Phone Number")
     name = st.text_input("Name (Optional)")
+    credits = st.number_input("Credits", min_value=0, value=0)
     if st.button("Save"):
-        mgr.create_user(phone_number, name)
+        mgr.create_user(phone_number, name, credits)
         st.success(f"User {phone_number} has been successfully created!")
 
 if __name__ == "__main__":
     app()
-    st.write(st.session_state)
