@@ -45,13 +45,15 @@ class Manager:
         self.db.save()
 
     # Edit user information
-    def edit_user(self, phone_number, name=None, credits=None):
+    def edit_user(self, phone_number, name=None, credits=None, notes=None):
         UserQuery = Query()
         updates = {}
         if name:
             updates['name'] = name
         if credits is not None:
             updates['credits'] = credits
+        if notes:
+            updates['notes'] = notes
         self.users_table.update(updates, UserQuery.phone_number == phone_number)
         self.db.save()
     # Delete a user

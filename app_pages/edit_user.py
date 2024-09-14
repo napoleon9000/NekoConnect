@@ -19,7 +19,7 @@ def app():
             credits = st.number_input("Credits", value=user[0]['credits'])
             notes = st.text_area("Notes", value=user[0]['notes'])
             if st.button("Save"):
-                mgr.edit_user(phone_number, name=name, credits=credits)
+                mgr.edit_user(phone_number, name=name, credits=credits, notes=notes)
                 st.success(f"User {phone_number} has been successfully updated!")
             st.markdown("---")
             col1, col2 = st.columns(2)
