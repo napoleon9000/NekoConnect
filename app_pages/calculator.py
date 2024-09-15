@@ -84,15 +84,6 @@ def app():
                 st.metric("Toys Payout", f"{toys_payout_high:.2f}")
                 st.metric("Profit", f"${profit_high:.2f}")
             
-            # Display input data as a table
-            st.subheader("Input Data Summary")
-            df = pd.DataFrame({
-                "Amount": ["$1", "$10", "$20", "$50", "$100"],
-                "Count": [ones, tens, twenties, fifties, hundreds],
-                "Total": [ones, tens*10, twenties*20, fifties*50, hundreds*100]
-            })
-            df["Total"] = df["Total"].apply(lambda x: f"${x}")
-            st.table(df)
         else:
             st.error("Please enter at least one transaction amount.")
 
