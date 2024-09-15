@@ -1,76 +1,100 @@
 import streamlit as st
 import pandas as pd
 
-from calculator import profit_estimation
+from calculator import profit_estimation, profit_estimation_with_total_payout
 
 def app():
-    if 'data_input' not in st.session_state:
-        st.session_state.data_input = ""
-
     st.title("Calculator")
     st.markdown("---")
     # profit estimation
     st.markdown("### Profit Estimation")
+    
     # Input for data
     st.subheader("Enter transaction amounts")
-    col1, col2, col3, col4, col5, col6 = st.columns([1,1,1,1,1,8])
+    col1, col2, col3, col4, col5 = st.columns(5)
+    
     with col1:
-        if st.button("10"):
-            if not len(st.session_state.data_input) == 0 and not st.session_state.data_input.endswith("\n"):
-                st.session_state.data_input += "\n"
-            st.session_state.data_input += "10\n"
+        ones = st.number_input("Number of $1", min_value=0, step=1, key="ones")
     with col2:
-        if st.button("20"):
-            if not len(st.session_state.data_input) == 0 and not st.session_state.data_input.endswith("\n"):
-                st.session_state.data_input += "\n"
-            st.session_state.data_input += "20\n"
+        tens = st.number_input("Number of $10", min_value=0, step=1, key="tens")
     with col3:
-        if st.button("50"):
-            if not len(st.session_state.data_input) == 0 and not st.session_state.data_input.endswith("\n"):
-                st.session_state.data_input += "\n"
-            st.session_state.data_input += "50\n"
+        twenties = st.number_input("Number of $20", min_value=0, step=1, key="twenties")
     with col4:
-        if st.button("100"):
-            if not len(st.session_state.data_input) == 0 and not st.session_state.data_input.endswith("\n"):
-                st.session_state.data_input += "\n"
-            st.session_state.data_input += "100\n"
+        fifties = st.number_input("Number of $50", min_value=0, step=1, key="fifties")
     with col5:
-        if st.button("Clear"):
-            st.session_state.data_input = ""
+        hundreds = st.number_input("Number of $100", min_value=0, step=1, key="hundreds")
+    
+    total_payout_toys = st.number_input("Total payout toys", min_value=0, step=1, key="total_payout_toys")
 
-    data_input = st.text_area("Enter amounts (one per line):", value=st.session_state.data_input, height=150)
-    st.session_state.data_input = data_input
+    # Generate data list
+    data = ([1] * ones + [10] * tens + [20] * twenties + 
+            [50] * fifties + [100] * hundreds)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        # Input for parameters (lower bound)
+        st.subheader("Parameters (Lower Bound)")
+        toys_payout_interval = st.number_input("Toys payout interval", value=3.0, step=0.1, key="toys_rate_low")
+        toys_payout_rate_low = 1/toys_payout_interval
+        avg_toys_cost_low = st.number_input("Average toys cost (Low):", value=2.5, step=0.1, key="toys_cost_low")
+        fixed_cost_low = st.number_input("Fixed cost (Low):", value=400, step=10, key="fixed_cost_low")
 
-    # Convert input to list of integers
-    data = [int(x.strip()) for x in data_input.split('\n') if x.strip().isdigit()]
-
-    # Input for parameters
-    st.subheader("Parameters")
-    toys_payout_rate = st.number_input("Toys payout rate:", value=1/7.0, format="%.4f", step=0.0001)
-    avg_toys_cost = st.number_input("Average toys cost:", value=2.5, step=0.1)
-    fixed_cost = st.number_input("Fixed cost:", value=400, step=10)
+    with col2:
+        # Input for parameters (upper bound)
+        st.subheader("Parameters (Upper Bound)")
+        toys_payout_interval = st.number_input("Toys payout interval", value=8.0, step=0.1, key="toys_rate_high")
+        toys_payout_rate_high = 1/toys_payout_interval
+        avg_toys_cost_high = st.number_input("Average toys cost (High):", value=2.5, step=0.1, key="toys_cost_high")
+        fixed_cost_high = st.number_input("Fixed cost (High):", value=400, step=10, key="fixed_cost_high")
 
     if st.button("Calculate Profit"):
         if data:
-            profit, total_income, total_tokens, toys_payout = profit_estimation(
-                data, toys_payout_rate, avg_toys_cost, fixed_cost
-            )
+            # Calculate lower bound
+            if total_payout_toys:
+                profit_low, total_income_low, total_tokens_low, toys_payout_low = profit_estimation_with_total_payout(
+                    data, total_payout_toys, avg_toys_cost_low, fixed_cost_low
+                )
+            else:
+                profit_low, total_income_low, total_tokens_low, toys_payout_low = profit_estimation(
+                    data, toys_payout_rate_low, avg_toys_cost_low, fixed_cost_low
+                )
+            
+            # Calculate upper bound
+            if total_payout_toys:
+                profit_high, total_income_high, total_tokens_high, toys_payout_high = profit_estimation_with_total_payout(
+                    data, total_payout_toys, avg_toys_cost_high, fixed_cost_high
+                )
+            else:
+                profit_high, total_income_high, total_tokens_high, toys_payout_high = profit_estimation(
+                    data, toys_payout_rate_high, avg_toys_cost_high, fixed_cost_high
+                )
             
             st.subheader("Results")
             col1, col2 = st.columns(2)
             with col1:
-                st.metric("Total Income", f"${total_income:.2f}")
-                st.metric("Total Tokens", total_tokens)
+                st.markdown("#### Lower Bound")
+                st.metric("Total Income", f"${total_income_low:.2f}")
+                st.metric("Total Tokens", total_tokens_low)
+                st.metric("Toys Payout", f"{toys_payout_low:.2f}")
+                st.metric("Profit", f"${profit_low:.2f}")
             with col2:
-                st.metric("Toys Payout", f"{toys_payout:.2f}")
-                st.metric("Profit", f"${profit:.2f}")
+                st.markdown("#### Upper Bound")
+                st.metric("Total Income", f"${total_income_high:.2f}")
+                st.metric("Total Tokens", total_tokens_high)
+                st.metric("Toys Payout", f"{toys_payout_high:.2f}")
+                st.metric("Profit", f"${profit_high:.2f}")
             
             # Display input data as a table
-            st.subheader("Input Data")
-            df = pd.DataFrame({"Amount": data})
-            st.dataframe(df.T)
+            st.subheader("Input Data Summary")
+            df = pd.DataFrame({
+                "Amount": ["$1", "$10", "$20", "$50", "$100"],
+                "Count": [ones, tens, twenties, fifties, hundreds],
+                "Total": [ones, tens*10, twenties*20, fifties*50, hundreds*100]
+            })
+            df["Total"] = df["Total"].apply(lambda x: f"${x}")
+            st.table(df)
         else:
-            st.error("Please enter valid transaction amounts.")
+            st.error("Please enter at least one transaction amount.")
 
 if __name__ == "__main__":
     app()
