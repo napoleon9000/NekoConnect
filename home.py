@@ -16,6 +16,8 @@ from backend import Manager
 from app_pages.edit_user import app as edit_user_page
 from app_pages.add_new_user import app as add_new_user_page
 from app_pages.calculator import app as calculator_page
+from app_pages.machines import app as machines_page
+from app_pages.record import app as record_page
 
 
 logging.basicConfig(level=logging.INFO)
@@ -55,6 +57,9 @@ if authentication_status:
     st.sidebar.button("Add New User", on_click=switch_page, args=('add_new_user',), use_container_width=True)
     st.sidebar.button("Edit User", on_click=switch_page, args=('edit_user',), use_container_width=True)
     st.sidebar.button("Calculator", on_click=switch_page, args=('calculator',), use_container_width=True)
+    st.sidebar.button("Machines", on_click=switch_page, args=('machines',), use_container_width=True)
+    st.sidebar.button("Record", on_click=switch_page, args=('record',), use_container_width=True)
+
 
     def home_page():
         # Page functionality
@@ -133,6 +138,12 @@ if authentication_status:
 
     elif st.session_state['page'] == 'calculator':
         calculator_page()
+
+    elif st.session_state['page'] == 'machines':
+        machines_page()
+
+    elif st.session_state['page'] == 'record':
+        record_page()
 
 elif authentication_status == False:
     st.error('Username/password is incorrect')
