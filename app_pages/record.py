@@ -52,45 +52,46 @@ def app():
     for machine in machines:
         cols = st.columns(5)
         machine_id = machine['id']
-        with cols[0]:
-            machine_image = manager.get_image_by_machine_id(machine_id)
-            if machine_image is None:
-                machine_image = 'claw_machine.webp'
-            name = machine['name']
-            location = machine['location']
-            st.image(machine_image, width=150)
-            if name is not None and name != "":
-                st.markdown(f"**Name:** {name}")
-            else:
-                st.markdown(f"**id:** {machine_id}")
-            if location is not None and location != "":
-                st.markdown(f"**Location:** {location}")
-            
+        with st.form(key='record_form', border=False):
+            with cols[0]:
+                machine_image = manager.get_image_by_machine_id(machine_id)
+                if machine_image is None:
+                    machine_image = 'claw_machine.webp'
+                name = machine['name']
+                location = machine['location']
+                st.image(machine_image, width=150)
+                if name is not None and name != "":
+                    st.markdown(f"**Name:** {name}")
+                else:
+                    st.markdown(f"**id:** {machine_id}")
+                if location is not None and location != "":
+                    st.markdown(f"**Location:** {location}")
+                
 
-        with cols[1]:
-            coins_in = st.number_input("Coins In", key=f"coins_in_{machine_id}", min_value=0, max_value=1000, value=0)
-            toys_payout = st.number_input("Toys Payout", key=f"toys_payout_{machine_id}", min_value=0, max_value=1000, value=0)
-            date = st.date_input("Date", key=f"date_{machine_id}")
-        
-        with cols[2]:
-            param_strong_strength_value = machine.get('param_strong_strength', 0) if machine.get('param_strong_strength') is not None else 0    
-            param_strong_strength = st.number_input("Strong Strength", key=f"param_strong_strength_{machine_id}", min_value=0.0, max_value=50.0, step=0.2, value=param_strong_strength_value)
-            param_medium_strength_value = machine.get('param_medium_strength', 0) if machine.get('param_medium_strength') is not None else 0
-            param_medium_strength = st.number_input("Medium Strength", key=f"param_medium_strength_{machine_id}", min_value=0.0, max_value=50.0, step=0.2, value=param_medium_strength_value)
-            param_weak_strength_value = machine.get('param_weak_strength', 0) if machine.get('param_weak_strength') is not None else 0
-            param_weak_strength = st.number_input("Weak Strength", key=f"param_weak_strength_{machine_id}", min_value=0.0, max_value=50.0, step=0.2, value=param_weak_strength_value)
-        
-        with cols[3]:
-            param_award_interval = st.number_input("Award Interval", key=f"param_award_interval_{machine_id}", min_value=0, max_value=1000, value=machine.get('param_award_interval', 0))
-            options = ["1", "2", "3"]
-            param_mode_value = machine.get('param_mode', 0) if machine.get('param_mode') is not None else '1'
-            param_mode_value = options.index(param_mode_value)
-            param_mode = st.selectbox("Mode", options, key=f"param_mode_{machine_id}", index=param_mode_value)
-        
-        with cols[4]:
-            notes = st.text_area("Notes", key=f"notes_{machine_id}")
-            if st.button("Save", key=f"save_{machine_id}"):
-                save_record(machine_id, manager)
+            with cols[1]:
+                coins_in = st.number_input("Coins In", key=f"coins_in_{machine_id}", min_value=0, max_value=1000, value=0)
+                toys_payout = st.number_input("Toys Payout", key=f"toys_payout_{machine_id}", min_value=0, max_value=1000, value=0)
+                date = st.date_input("Date", key=f"date_{machine_id}")
+            
+            with cols[2]:
+                param_strong_strength_value = machine.get('param_strong_strength', 0) if machine.get('param_strong_strength') is not None else 0    
+                param_strong_strength = st.number_input("Strong Strength", key=f"param_strong_strength_{machine_id}", min_value=0.0, max_value=50.0, step=0.2, value=param_strong_strength_value)
+                param_medium_strength_value = machine.get('param_medium_strength', 0) if machine.get('param_medium_strength') is not None else 0
+                param_medium_strength = st.number_input("Medium Strength", key=f"param_medium_strength_{machine_id}", min_value=0.0, max_value=50.0, step=0.2, value=param_medium_strength_value)
+                param_weak_strength_value = machine.get('param_weak_strength', 0) if machine.get('param_weak_strength') is not None else 0
+                param_weak_strength = st.number_input("Weak Strength", key=f"param_weak_strength_{machine_id}", min_value=0.0, max_value=50.0, step=0.2, value=param_weak_strength_value)
+            
+            with cols[3]:
+                param_award_interval = st.number_input("Award Interval", key=f"param_award_interval_{machine_id}", min_value=0, max_value=1000, value=machine.get('param_award_interval', 0))
+                options = ["1", "2", "3"]
+                param_mode_value = machine.get('param_mode', 0) if machine.get('param_mode') is not None else '1'
+                param_mode_value = options.index(param_mode_value)
+                param_mode = st.selectbox("Mode", options, key=f"param_mode_{machine_id}", index=param_mode_value)
+            
+            with cols[4]:
+                notes = st.text_area("Notes", key=f"notes_{machine_id}")
+                if st.form_submit_button("Save", key=f"save_{machine_id}"):
+                    save_record(machine_id, manager)
         
         st.markdown("---")
     
