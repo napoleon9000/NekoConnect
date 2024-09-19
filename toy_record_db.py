@@ -51,9 +51,14 @@ class DB:
     def table(self, table_name):
         return self.db.table(table_name)
 
+    def delete_file(self, path):
+        full_path = f"{self.bucket}/{path}"
+        self.conn._instance.delete(full_path)
+
     def save(self):
-        # Convert the database to a JSON string
+        # Convert the current database to a JSON string
         db_json = json.dumps(self.db.storage.read())
+        logging.info(f"db_json: {self.db.storage.read()['machines']}")
 
         # Create a temporary file
         with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp_file:
@@ -67,9 +72,12 @@ class DB:
         try:
             # Use the put method to upload the file
             self.conn._instance.put(temp_file.name, self.current_db_path)
+        except Exception as e:
+            logging.error(f"Error saving database: {e}")
         finally:
             # Clean up the temporary file
             os.unlink(temp_file.name)
+            
     def download_all_data(self):
         db_dict = self.conn.read(self.current_db_path, input_format="json", ttl=0)
         return db_dict

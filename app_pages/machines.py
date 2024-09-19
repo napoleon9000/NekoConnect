@@ -8,8 +8,16 @@ from io import BytesIO
 
 logger = logging.getLogger(__name__)
 
+def delete_machine(machine_id, manager: Manager):
+    manager.delete_machine(machine_id)
+    st.success("Machine deleted successfully")
+
 def app():
-    st.title("Machines")
+    col1, col2, col3 = st.columns([1, 1, 4])
+    with col1:
+        st.title("Machines")
+    with col2:
+        st.button("Refresh")
     st.markdown("---")
 
     # show all machines and images
@@ -25,6 +33,8 @@ def app():
         status = machine['status']
         notes = machine['notes']
         image = manager.get_image_by_machine_id(machine['id'])
+        del machine['doc_id']
+        machine_obj = Machine(**machine)
 
         # Determine which column to use
         col = columns[idx % num_columns]
@@ -37,10 +47,13 @@ def app():
                 st.markdown(f"**id:** {machine['id']}")
             if location is not None and location != "":
                 st.markdown(f"**Location:** {location}")
+            if machine_obj.get_params() is not None:
+                st.markdown(f"**Params:** {machine_obj.get_params()}")
             if status is not None and status != "":
                 st.markdown(f"**Status:** {status}")
             if notes is not None and notes != "":
                 st.markdown(f"**Notes:** {notes}")
+            st.button("Delete", key=f"delete_{machine['id']}", on_click=delete_machine, args=(machine['id'], manager))
 
     # create machine (in an expander)
     with st.expander("Add New Machine"):
@@ -49,11 +62,17 @@ def app():
         location = st.text_input("Location")
         status = st.text_input("Status")
         notes = st.text_input("Notes")
+        strong_strength = st.number_input("Strong Strength", min_value=0.0, max_value=50.0, step=0.2, format="%.1f")
+        medium_strength = st.number_input("Medium Strength", min_value=0.0, max_value=50.0, step=0.2, format="%.1f")
+        weak_strength = st.number_input("Weak Strength", min_value=0.0, max_value=50.0, step=0.2, format="%.1f")
+        award_interval = st.number_input("Award Interval", min_value=1, step=1)
+        mode = st.selectbox("Mode", ["1", "2", "3"])
         image = st.file_uploader("Image", type=["jpg", "png"])
-        logger.info(f"Image: {image}")
         if st.button("Save"):
-            new_machine = Machine(name, location, status, notes)
-            logger.info(f"New machine: {new_machine}")
+            new_machine = Machine(name=name, location=location, status=status, notes=notes,
+                                  param_strong_strength=strong_strength, param_medium_strength=medium_strength,
+                                  param_weak_strength=weak_strength, param_award_interval=award_interval,
+                                  param_mode=mode)
             img_bytesio = BytesIO(image.getvalue())
             manager.create_machine(new_machine, img_bytesio)
             st.success("Machine created successfully")

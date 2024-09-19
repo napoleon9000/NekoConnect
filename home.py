@@ -18,6 +18,7 @@ from app_pages.add_new_user import app as add_new_user_page
 from app_pages.calculator import app as calculator_page
 from app_pages.machines import app as machines_page
 from app_pages.record import app as record_page
+from app_pages.record_analyze import app as record_analyze_page
 
 
 logging.basicConfig(level=logging.INFO)
@@ -58,7 +59,8 @@ if authentication_status:
     st.sidebar.button("Edit User", on_click=switch_page, args=('edit_user',), use_container_width=True)
     st.sidebar.button("Calculator", on_click=switch_page, args=('calculator',), use_container_width=True)
     st.sidebar.button("Machines", on_click=switch_page, args=('machines',), use_container_width=True)
-    st.sidebar.button("Record", on_click=switch_page, args=('record',), use_container_width=True)
+    st.sidebar.button("Add Record", on_click=switch_page, args=('record',), use_container_width=True)
+    st.sidebar.button("Record Analyze", on_click=switch_page, args=('record_analyze',), use_container_width=True)
 
 
     def home_page():
@@ -113,6 +115,7 @@ if authentication_status:
 
 
             def on_delete_click(index):
+                # double check to confirm deletion
                 phone_number = all_info.iloc[index]['phone_number']
                 mgr.delete_user(phone_number)
 
@@ -144,6 +147,9 @@ if authentication_status:
 
     elif st.session_state['page'] == 'record':
         record_page()
+
+    elif st.session_state['page'] == 'record_analyze':
+        record_analyze_page()
 
 elif authentication_status == False:
     st.error('Username/password is incorrect')
