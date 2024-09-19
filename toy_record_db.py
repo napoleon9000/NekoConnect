@@ -58,7 +58,6 @@ class DB:
     def save(self):
         # Convert the current database to a JSON string
         db_json = json.dumps(self.db.storage.read())
-        logging.info(f"db_json: {self.db.storage.read()['machines']}")
 
         # Create a temporary file
         with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp_file:

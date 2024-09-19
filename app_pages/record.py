@@ -54,6 +54,8 @@ def app():
         machine_id = machine['id']
         with cols[0]:
             machine_image = manager.get_image_by_machine_id(machine_id)
+            if machine_image is None:
+                machine_image = 'claw_machine.webp'
             name = machine['name']
             location = machine['location']
             st.image(machine_image, width=150)

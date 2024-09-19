@@ -19,6 +19,7 @@ from app_pages.calculator import app as calculator_page
 from app_pages.machines import app as machines_page
 from app_pages.record import app as record_page
 from app_pages.record_analyze import app as record_analyze_page
+from app_pages.edit_machine import app as edit_machine_page
 
 
 logging.basicConfig(level=logging.INFO)
@@ -30,19 +31,26 @@ st.set_page_config(
 
 st_secrets = dict(st.secrets)
 credentials = dict(st_secrets['credentials'])
+env = st_secrets['ENV']['ENV']
 
-authenticator = Authenticate(
-    credentials,
-    st_secrets['cookie']['name'],
-    st_secrets['cookie']['key'],
-    st_secrets['cookie']['expiry_days'],
-    st_secrets['preauthorized']
-)
+if env != 'dev':
+    authenticator = Authenticate(
+        credentials,
+        st_secrets['cookie']['name'],
+        st_secrets['cookie']['key'],
+        st_secrets['cookie']['expiry_days'],
+        st_secrets['preauthorized']
+    )
 
-name, authentication_status, username = authenticator.login(key='Login', location='main')
+    name, authentication_status, username = authenticator.login(key='Login', location='main')
+
+else:
+    name = 'Dev'
+    authentication_status = True
+    username = 'nekoconnect'
 
 if authentication_status:
-    env = st_secrets['ENV']['ENV']
+    
     mgr = Manager(env)
 
     # init session state
@@ -61,6 +69,7 @@ if authentication_status:
     st.sidebar.button("Machines", on_click=switch_page, args=('machines',), use_container_width=True)
     st.sidebar.button("Add Record", on_click=switch_page, args=('record',), use_container_width=True)
     st.sidebar.button("Record Analyze", on_click=switch_page, args=('record_analyze',), use_container_width=True)
+    st.sidebar.button("Edit Machine", on_click=switch_page, args=('edit_machine',), use_container_width=True)
 
 
     def home_page():
@@ -76,7 +85,8 @@ if authentication_status:
                 with col3:  
                     st.write(f'Welcome *{name}*')
                 with col4:
-                    authenticator.logout('Logout', 'main')
+                    if env != 'dev':    
+                        authenticator.logout('Logout', 'main')
             st.markdown("---")
             st.markdown("### All Users")
 
@@ -150,6 +160,9 @@ if authentication_status:
 
     elif st.session_state['page'] == 'record_analyze':
         record_analyze_page()
+
+    elif st.session_state['page'] == 'edit_machine':
+        edit_machine_page()
 
 elif authentication_status == False:
     st.error('Username/password is incorrect')

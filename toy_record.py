@@ -13,8 +13,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-
-
 @dataclass
 class Record:
     machine_id: str
@@ -64,13 +62,15 @@ class Manager:
         self.records_table = self.db.table('records')
 
     def create_machine(self, machine: Machine, image: BytesIO):
-        n_machine = len(self.get_all_machines()) + 1
-        machine.id = f"m{n_machine}"
-        # upload image to blob storage
-        image_path = f"images/machines/{machine.id}.jpg"
-        self.db.upload_file(image, image_path, compress=True)
-        machine.image = image_path
-        self.machines_table.insert(machine.__dict__)
+        logger.info("create_machine")
+        logger.info(machine)
+        if image is not None:
+            # upload image to blob storage
+            image_path = f"images/machines/{machine.id}.jpg"
+            self.db.upload_file(image, image_path, compress=True)
+            machine.image = image_path
+        
+        self.machines_table.upsert(machine.__dict__, Query().id == machine.id)
         self.db.save()
 
     def get_all_machines(self):
@@ -80,7 +80,8 @@ class Manager:
         machines = self.get_all_machines()
         res = []
         for machine in machines:
-            del machine['doc_id']
+            if 'doc_id' in machine:
+                del machine['doc_id']
             machine_obj = Machine(**machine)
             res.append(machine_obj)
 
@@ -89,11 +90,19 @@ class Manager:
     def get_image_by_machine_id(self, machine_id):
         machine = self.get_machine_by_id(machine_id)
         path = machine['image']
+        if path is None:
+            return None
         image = get_image_by_path(path, self.db)
         return image
 
     def get_machine_by_id(self, machine_id):
         return self.machines_table.get(Query().id == machine_id)
+
+    def get_machine_obj_by_id(self, machine_id):
+        machine = self.get_machine_by_id(machine_id)
+        if 'doc_id' in machine.keys():
+            del machine['doc_id']
+        return Machine(**machine)
 
     def update_machine(self, machine_id, machine):
         res = self.machines_table.upsert(machine, Query().id == machine_id)
@@ -102,7 +111,8 @@ class Manager:
     def delete_machine(self, machine_id):
         machine = self.get_machine_by_id(machine_id)
         self.machines_table.remove(Query().id == machine_id)
-        self.db.delete_file(machine['image'])
+        if machine['image'] is not None:
+            self.db.delete_file(machine['image'])
         self.db.save()
 
     def create_record(self, record: Record):
@@ -116,7 +126,6 @@ class Manager:
         machine['param_weak_strength'] = record.param_weak_strength
         machine['param_award_interval'] = record.param_award_interval
         machine['param_mode'] = record.param_mode
-        logger.info(f"machine: {machine}")
         self.update_machine(machine_id, machine)   # db saved
 
     def get_all_records(self):
