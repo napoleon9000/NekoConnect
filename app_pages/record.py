@@ -52,7 +52,7 @@ def app():
     for machine in machines:
         cols = st.columns(5)
         machine_id = machine['id']
-        with st.form(key='record_form', border=False):
+        with st.form(key='record_form_'+machine_id, border=False):
             with cols[0]:
                 machine_image = manager.get_image_by_machine_id(machine_id)
                 if machine_image is None:
@@ -90,8 +90,9 @@ def app():
             
             with cols[4]:
                 notes = st.text_area("Notes", key=f"notes_{machine_id}")
-                if st.form_submit_button("Save"):
-                    save_record(machine_id, manager)
+
+            if st.form_submit_button("Save"):
+                save_record(machine_id, manager)
         
         st.markdown("---")
     
