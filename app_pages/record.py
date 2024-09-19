@@ -90,7 +90,7 @@ def app():
             
             with cols[4]:
                 notes = st.text_area("Notes", key=f"notes_{machine_id}")
-                if st.form_submit_button("Save", key=f"save_{machine_id}"):
+                if st.form_submit_button("Save"):
                     save_record(machine_id, manager)
         
         st.markdown("---")
