@@ -101,8 +101,6 @@ def app():
 
         st.success("Record saved successfully!")
     
-    records = manager.get_all_records_df()
-    st.dataframe(records)
 
 if __name__ == "__main__":
     app()
