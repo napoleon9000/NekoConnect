@@ -18,7 +18,7 @@ def app():
     for machine in machines:
         cols = st.columns([1, 8])
         machine_id = machine.id
-        analyze_result = manager.calculate_machine_payout_rate(machine_id)
+        analyze_result, all_time_payout_rate = manager.calculate_machine_payout_rate(machine_id)
         with cols[0]:
             machine_image = manager.get_image_by_machine_id(machine_id)
             name = machine.name
@@ -30,8 +30,8 @@ def app():
                 st.markdown(f"**id:** {machine_id}")
             if location is not None and location != "":
                 st.markdown(f"**Location:** {location}")
-            all_time_payout_rate = analyze_result['all_time_payout_rate']
             st.markdown(f"**All Time Payout Rate:** {all_time_payout_rate:.2f}")
+            st.markdown(f"**Last Payout Rate:** {analyze_result['daily_payout_rate'].tolist()[-1]:.2f}") 
             st.markdown(f"**Machine Params:** {machine.get_params()}")
 
         with cols[1]:

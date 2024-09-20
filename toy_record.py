@@ -140,23 +140,17 @@ class Manager:
         keys = ['date', 'coins_in', 'toys_payout', 'param_strong_strength', 'param_medium_strength', 'param_weak_strength', 'param_award_interval', 'param_mode', 'notes']
         records = self.records_table.search(Query().machine_id == machine_id)
         df = pd.DataFrame(records)
+        # sort by date
+        df = df.sort_values(by='date', ascending=True)
+
         return df[keys]
 
     def calculate_machine_payout_rate(self, machine_id):
         records = self.get_records_by_machine_id(machine_id)
-        total_coins_in = records['coins_in'].sum()
-        total_toys_payout = records['toys_payout'].sum()
-        # all time payout rate
-        if total_coins_in == 0:
-            all_time_payout_rate = 0
-        else:
-            all_time_payout_rate = total_toys_payout / total_coins_in
+        processed_records = []
         # daily payout rate
-        daily_payout_rate = []
-        daily_coins_in = []
-        daily_toys_payout = []
         records['date'] = pd.to_datetime(records['date'])
-        records_sorted = records.sort_values(by='date', ascending=False)
+        records_sorted = records.sort_values(by='date', ascending=True)
         for i in range(1, records.shape[0]):
             yesterday_coins_in = records_sorted.iloc[i-1]['coins_in']
             yesterday_toys_payout = records_sorted.iloc[i-1]['toys_payout']
@@ -170,35 +164,53 @@ class Manager:
 
             coins_diff = today_coins_in - yesterday_coins_in
             toys_diff = today_toys_payout - yesterday_toys_payout
-            if coins_diff == 0:
-                daily_payout_rate.append(0)
+            if coins_diff == 0 or toys_diff == 0:
+                daily_payout_rate = 0
             else:
-                daily_payout_rate.append(toys_diff / coins_diff)
-            daily_coins_in.append(int(coins_diff))
-            daily_toys_payout.append(int(toys_diff))
+                daily_payout_rate = coins_diff / toys_diff
 
+            processed_records.append({
+                'date': records_sorted.iloc[i]['date'],
+                'daily_coins_in': coins_diff,
+                'daily_toys_payout': toys_diff,
+                'daily_payout_rate': daily_payout_rate,
+            })
 
-        return {
-            'all_time_payout_rate': all_time_payout_rate,
-            'daily_payout_rate': daily_payout_rate,
-            'daily_coins_in': daily_coins_in,
-            'daily_toys_payout': daily_toys_payout
+        processed_records = pd.DataFrame(processed_records)
+        # all time payout rate
+        total_coins_in = processed_records['daily_coins_in'].sum()
+        total_toys_payout = processed_records['daily_toys_payout'].sum()
+        if total_coins_in == 0 or total_toys_payout == 0:
+            all_time_payout_rate = 0.0
+        else:
+            all_time_payout_rate = total_coins_in / total_toys_payout 
+
+        result = {
+            'daily_payout_rate': processed_records['daily_payout_rate'].tolist(),
+            'daily_coins_in': processed_records['daily_coins_in'].tolist(),
+            'daily_toys_payout': processed_records['daily_toys_payout'].tolist(),
+            'date': processed_records['date'].tolist()
         }
 
+        return pd.DataFrame(result), all_time_payout_rate
     def plot_analyze_result(self, analyze_result):
         # Combine daily_coins_in and daily_toys_payout into a single DataFrame
         combined_df = pd.DataFrame({
             'daily_coins_in': analyze_result['daily_coins_in'],
-            'daily_toys_payout': analyze_result['daily_toys_payout']
+            'daily_toys_payout': analyze_result['daily_toys_payout'],
+            'date': analyze_result['date']
         })
         
         # Plot daily_coins_in and daily_toys_payout on the same plot
+        print('----')
+        print(analyze_result)
+        print('----')
         col1, col2 = st.columns(2)
         with col1:
-            st.line_chart(combined_df)
+            st.line_chart(data=combined_df, x='date', y=['daily_coins_in', 'daily_toys_payout'])
             st.write('coins in & toys payout')
         with col2:
-            st.line_chart(analyze_result['daily_payout_rate'])
+            st.line_chart(data=analyze_result, x='date', y='daily_payout_rate')
             st.write('payout rate')
 
     def save_record(self, record: Record):
