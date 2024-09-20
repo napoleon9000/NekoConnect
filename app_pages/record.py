@@ -3,13 +3,15 @@ import pandas as pd
 from dataclasses import dataclass
 import traceback
 import logging
+import pytz
+from datetime import datetime
 
 from toy_record import Manager, Record
 
 logger = logging.getLogger(__name__)
 
 def save_record(machine_id, manager: Manager):
-    date = st.session_state[f"date_{machine_id}"]
+    date = st.session_state[f"date"]
     date_str = date.strftime("%Y-%m-%d")
     coins_in = st.session_state[f"coins_in_{machine_id}"]
     toys_payout = st.session_state[f"toys_payout_{machine_id}"]
@@ -41,13 +43,21 @@ def save_record(machine_id, manager: Manager):
 
 
 def app():
-    st.title("Toys Record")
+    # today's date in central time
+    today = datetime.now(pytz.timezone('US/Central'))
+    col1, col2, _ = st.columns([2, 2, 4])
+    with col1:
+        st.title("Toys Record")
+    with col2:
+        date = st.date_input("Date", key="date", value=today)
     st.markdown("---")
 
     # show all machines and images
     env = st.secrets['ENV']['ENV']
     manager = Manager(env)
     machines = manager.get_all_machines()
+    
+
 
     for machine in machines:
         cols = st.columns(5)
@@ -71,7 +81,6 @@ def app():
             with cols[1]:
                 coins_in = st.number_input("Coins In", key=f"coins_in_{machine_id}", min_value=0, max_value=1000, value=0)
                 toys_payout = st.number_input("Toys Payout", key=f"toys_payout_{machine_id}", min_value=0, max_value=1000, value=0)
-                date = st.date_input("Date", key=f"date_{machine_id}")
             
             with cols[2]:
                 param_strong_strength_value = machine.get('param_strong_strength', 0) if machine.get('param_strong_strength') is not None else 0    
