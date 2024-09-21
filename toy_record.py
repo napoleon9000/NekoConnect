@@ -202,9 +202,6 @@ class Manager:
         })
         
         # Plot daily_coins_in and daily_toys_payout on the same plot
-        print('----')
-        print(analyze_result)
-        print('----')
         col1, col2 = st.columns(2)
         with col1:
             st.line_chart(data=combined_df, x='date', y=['daily_coins_in', 'daily_toys_payout'])
