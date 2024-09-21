@@ -202,12 +202,30 @@ class Manager:
         })
         
         # Plot daily_coins_in and daily_toys_payout on the same plot
+        import matplotlib.pyplot as plt
+
         col1, col2 = st.columns(2)
+        combined_df['date'] = pd.to_datetime(combined_df['date'])
+        combined_df['day_of_week'] = combined_df['date'].dt.strftime('%a')
+        combined_df['date_with_day'] = combined_df['date'].dt.strftime('%Y-%m-%d') + ' (' + combined_df['day_of_week'] + ')'
+        
         with col1:
-            st.line_chart(data=combined_df, x='date', y=['daily_coins_in', 'daily_toys_payout'])
+            fig, ax = plt.subplots()
+            combined_df.plot(x='date_with_day', y=['daily_coins_in', 'daily_toys_payout'], ax=ax, style='-o')
+            ax.set_title('Coins In & Toys Payout')
+            st.pyplot(fig)
             st.write('coins in & toys payout')
+        
+        analyze_result_df = pd.DataFrame(analyze_result)
+        analyze_result_df['date'] = pd.to_datetime(analyze_result_df['date'])
+        analyze_result_df['day_of_week'] = analyze_result_df['date'].dt.strftime('%a')
+        analyze_result_df['date_with_day'] = analyze_result_df['date'].dt.strftime('%Y-%m-%d') + ' (' + analyze_result_df['day_of_week'] + ')'
+        
         with col2:
-            st.line_chart(data=analyze_result, x='date', y='daily_payout_rate')
+            fig, ax = plt.subplots()
+            analyze_result_df.plot(x='date_with_day', y='daily_payout_rate', ax=ax, style='-o')
+            ax.set_title('Payout Rate')
+            st.pyplot(fig)
             st.write('payout rate')
 
     def save_record(self, record: Record):

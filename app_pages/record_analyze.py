@@ -3,6 +3,7 @@ import pandas as pd
 from dataclasses import dataclass
 
 from toy_record import Manager, Record
+import matplotlib.pyplot as plt
 
 
 
@@ -34,6 +35,10 @@ def app():
             if location is not None and location != "":
                 st.markdown(f"**Location:** {location}")
             st.markdown(f"**All Time Payout Rate:** {all_time_payout_rate:.2f}")
+            day_3_payout_rate = analyze_result['daily_payout_rate'].tolist()[-3:]
+            day_3_payout_rate = [v for v in day_3_payout_rate if v > 0]
+            avg_day_3_payout_rate = sum(day_3_payout_rate) / len(day_3_payout_rate)
+            st.markdown(f"**3-Day Payout Rate:** {avg_day_3_payout_rate:.2f}") 
             st.markdown(f"**Last Payout Rate:** {analyze_result['daily_payout_rate'].tolist()[-1]:.2f}") 
             st.markdown(f"**Machine Params:** {machine.get_params()}")
 
@@ -80,11 +85,25 @@ def app():
 
     cols = st.columns(2)
     with cols[0]:
-        st.line_chart(df1, y=['daily_coins_in', 'daily_toys_payout'], x='date')
+        st.markdown("##### Coins In & Toys Payout")
+        fig, ax = plt.subplots()
+        df1['date'] = pd.to_datetime(df1['date'])
+        df1['day_of_week'] = df1['date'].dt.strftime('%a')
+        df1['date_with_day'] = df1['date'].dt.strftime('%Y-%m-%d') + ' (' + df1['day_of_week'] + ')'
+        df1.plot(x='date_with_day', y=['daily_coins_in', 'daily_toys_payout'], ax=ax, style='-o')
+        ax.set_title('Coins In & Toys Payout')
+        st.pyplot(fig)
         with st.expander("Detail Records", expanded=False):
             st.dataframe(df1)
     with cols[1]:
-        st.line_chart(df2, y='daily_payout_rate', x='date')
+        st.markdown("##### Payout Rate")
+        fig, ax = plt.subplots()
+        df2['date'] = pd.to_datetime(df2['date'])
+        df2['day_of_week'] = df2['date'].dt.strftime('%a')
+        df2['date_with_day'] = df2['date'].dt.strftime('%Y-%m-%d') + ' (' + df2['day_of_week'] + ')'
+        df2.plot(x='date_with_day', y='daily_payout_rate', ax=ax, style='-o')
+        ax.set_title('Payout Rate')
+        st.pyplot(fig)
         with st.expander("Detail Records", expanded=False):
             st.dataframe(df2)
 
