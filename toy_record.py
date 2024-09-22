@@ -185,6 +185,15 @@ class Manager:
         else:
             all_time_payout_rate = total_coins_in / total_toys_payout 
 
+        # last 3-day payout rate
+        last_3_days_records = processed_records.tail(3)
+        last_3_days_coins_in = last_3_days_records['daily_coins_in'].sum()
+        last_3_days_toys_payout = last_3_days_records['daily_toys_payout'].sum()
+        if last_3_days_coins_in == 0 or last_3_days_toys_payout == 0:
+            last_3_days_payout_rate = 0.0
+        else:
+            last_3_days_payout_rate = last_3_days_coins_in / last_3_days_toys_payout
+
         result = {
             'daily_payout_rate': processed_records['daily_payout_rate'].tolist(),
             'daily_coins_in': processed_records['daily_coins_in'].tolist(),
@@ -192,7 +201,9 @@ class Manager:
             'date': processed_records['date'].tolist()
         }
 
-        return pd.DataFrame(result), all_time_payout_rate
+        return pd.DataFrame(result), all_time_payout_rate, last_3_days_payout_rate
+
+
     def plot_analyze_result(self, analyze_result):
         # Combine daily_coins_in and daily_toys_payout into a single DataFrame
         combined_df = pd.DataFrame({
@@ -207,7 +218,7 @@ class Manager:
         col1, col2 = st.columns(2)
         combined_df['date'] = pd.to_datetime(combined_df['date'])
         combined_df['day_of_week'] = combined_df['date'].dt.strftime('%a')
-        combined_df['date_with_day'] = combined_df['date'].dt.strftime('%Y-%m-%d') + ' (' + combined_df['day_of_week'] + ')'
+        combined_df['date_with_day'] = combined_df['date'].dt.strftime('%m-%d') + ' (' + combined_df['day_of_week'] + ')'
         
         with col1:
             fig, ax = plt.subplots()
@@ -219,7 +230,7 @@ class Manager:
         analyze_result_df = pd.DataFrame(analyze_result)
         analyze_result_df['date'] = pd.to_datetime(analyze_result_df['date'])
         analyze_result_df['day_of_week'] = analyze_result_df['date'].dt.strftime('%a')
-        analyze_result_df['date_with_day'] = analyze_result_df['date'].dt.strftime('%Y-%m-%d') + ' (' + analyze_result_df['day_of_week'] + ')'
+        analyze_result_df['date_with_day'] = analyze_result_df['date'].dt.strftime('%m-%d') + ' (' + analyze_result_df['day_of_week'] + ')'
         
         with col2:
             fig, ax = plt.subplots()
@@ -227,6 +238,40 @@ class Manager:
             ax.set_title('Payout Rate')
             st.pyplot(fig)
             st.write('payout rate')
+
+    def plot_overall_analyze_result(self, all_results):
+        all_dates = all_results[0]['date']
+        data_by_date = {k: {
+            'daily_payout_rate': [],    
+            'daily_coins_in': [],
+            'daily_toys_payout': []
+        } for k in all_dates}
+
+        for result in all_results:
+            for date in all_dates:
+                if date in result['date'].values:
+                    daily_payout_rate = result['daily_payout_rate'].loc[result['date'] == date].values[0]
+                    daily_coins_in = result['daily_coins_in'].loc[result['date'] == date].values[0]
+                    daily_toys_payout = result['daily_toys_payout'].loc[result['date'] == date].values[0]
+                    
+                    data_by_date[date]['daily_payout_rate'].append(daily_payout_rate)
+                    data_by_date[date]['daily_coins_in'].append(daily_coins_in)
+                    data_by_date[date]['daily_toys_payout'].append(daily_toys_payout)
+            
+        # sum each date
+        for date in all_dates:
+            data_by_date[date]['daily_payout_rate'] = sum(data_by_date[date]['daily_payout_rate']) / len(data_by_date[date]['daily_payout_rate'])
+            data_by_date[date]['daily_coins_in'] = sum(data_by_date[date]['daily_coins_in'])
+            data_by_date[date]['daily_toys_payout'] = sum(data_by_date[date]['daily_toys_payout'])
+
+        # for plot
+        df_all = pd.DataFrame(data_by_date).T.reset_index()
+        df1 = df_all[['daily_coins_in', 'daily_toys_payout']]
+        df1.loc[:, 'date'] = all_dates.values
+        df2 = df_all[['daily_payout_rate']]
+        df2.loc[:, 'date'] = all_dates.values
+
+        return df1, df2
 
     def save_record(self, record: Record):
         self.records_table.upsert(record.__dict__, Query().id == record.id)
