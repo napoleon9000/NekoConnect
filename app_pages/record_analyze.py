@@ -60,7 +60,7 @@ def app():
         fig, ax = plt.subplots()
         df1['date'] = pd.to_datetime(df1['date'])
         df1['day_of_week'] = df1['date'].dt.strftime('%a')
-        df1['date_with_day'] = df1['date'].dt.strftime('%m-%d') + ' (' + df1['day_of_week'] + ')'
+        df1['date_with_day'] = df1['date'].dt.strftime('%m-%d') + '_' + df1['day_of_week']
         df1.plot(x='date_with_day', y=['daily_coins_in', 'daily_toys_payout'], ax=ax, style='-o')
         ax.set_title('Coins In & Toys Payout')
         st.pyplot(fig)
@@ -71,7 +71,7 @@ def app():
         fig, ax = plt.subplots()
         df2['date'] = pd.to_datetime(df2['date'])
         df2['day_of_week'] = df2['date'].dt.strftime('%a')
-        df2['date_with_day'] = df2['date'].dt.strftime('%m-%d') + ' (' + df2['day_of_week'] + ')'
+        df2['date_with_day'] = df2['date'].dt.strftime('%m-%d') + '_' + df2['day_of_week']
         df2.plot(x='date_with_day', y='daily_payout_rate', ax=ax, style='-o')
         ax.set_title('Payout Rate')
         ax.set_ylim(0, 15)

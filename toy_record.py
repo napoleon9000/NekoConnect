@@ -218,7 +218,7 @@ class Manager:
         col1, col2 = st.columns(2)
         combined_df['date'] = pd.to_datetime(combined_df['date'])
         combined_df['day_of_week'] = combined_df['date'].dt.strftime('%a')
-        combined_df['date_with_day'] = combined_df['date'].dt.strftime('%m-%d') + ' (' + combined_df['day_of_week'] + ')'
+        combined_df['date_with_day'] = combined_df['date'].dt.strftime('%m-%d') + '_' + combined_df['day_of_week']
         
         with col1:
             fig, ax = plt.subplots()
@@ -230,7 +230,7 @@ class Manager:
         analyze_result_df = pd.DataFrame(analyze_result)
         analyze_result_df['date'] = pd.to_datetime(analyze_result_df['date'])
         analyze_result_df['day_of_week'] = analyze_result_df['date'].dt.strftime('%a')
-        analyze_result_df['date_with_day'] = analyze_result_df['date'].dt.strftime('%m-%d') + ' (' + analyze_result_df['day_of_week'] + ')'
+        analyze_result_df['date_with_day'] = analyze_result_df['date'].dt.strftime('%m-%d') + '_' + analyze_result_df['day_of_week']
         
         with col2:
             fig, ax = plt.subplots()
