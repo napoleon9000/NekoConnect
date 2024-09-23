@@ -224,7 +224,6 @@ class Manager:
             fig, ax = plt.subplots()
             combined_df.plot(x='date_with_day', y=['daily_coins_in', 'daily_toys_payout'], ax=ax, style='-o')
             ax.set_title('Coins In & Toys Payout')
-            ax.set_ylim(0, 15)
             st.pyplot(fig)
             st.write('coins in & toys payout')
         
