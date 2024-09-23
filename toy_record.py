@@ -260,9 +260,9 @@ class Manager:
             
         # sum each date
         for date in all_dates:
-            data_by_date[date]['daily_payout_rate'] = sum(data_by_date[date]['daily_payout_rate']) / len(data_by_date[date]['daily_payout_rate'])
             data_by_date[date]['daily_coins_in'] = sum(data_by_date[date]['daily_coins_in'])
             data_by_date[date]['daily_toys_payout'] = sum(data_by_date[date]['daily_toys_payout'])
+            data_by_date[date]['daily_payout_rate'] = data_by_date[date]['daily_coins_in'] / data_by_date[date]['daily_toys_payout']
 
         # for plot
         df_all = pd.DataFrame(data_by_date).T.reset_index()
