@@ -60,9 +60,9 @@ def app():
 
 
     for machine in machines:
-        cols = st.columns(5)
         machine_id = machine['id']
         with st.form(key='record_form_'+machine_id, border=False):
+            cols = st.columns(5)
             with cols[0]:
                 machine_image = manager.get_image_by_machine_id(machine_id)
                 if machine_image is None:
