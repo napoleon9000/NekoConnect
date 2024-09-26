@@ -13,8 +13,10 @@ logger = logging.getLogger(__name__)
 def save_record(machine_id, manager: Manager):
     date = st.session_state[f"date"]
     date_str = date.strftime("%Y-%m-%d")
-    coins_in = st.session_state[f"coins_in_{machine_id}"]
-    toys_payout = st.session_state[f"toys_payout_{machine_id}"]
+    coins_in_str = st.session_state[f"coins_in_str_{machine_id}"]
+    toys_payout_str = st.session_state[f"toys_payout_str_{machine_id}"]
+    coins_in = int(coins_in_str) if coins_in_str != "" else 0
+    toys_payout = int(toys_payout_str) if toys_payout_str != "" else 0
     param_strong_strength = st.session_state[f"param_strong_strength_{machine_id}"]
     param_medium_strength = st.session_state[f"param_medium_strength_{machine_id}"]
     param_weak_strength = st.session_state[f"param_weak_strength_{machine_id}"]
@@ -79,9 +81,11 @@ def app():
                 
 
             with cols[1]:
-                coins_in = st.number_input("Coins In", key=f"coins_in_{machine_id}", min_value=0, max_value=1000, value=0)
-                toys_payout = st.number_input("Toys Payout", key=f"toys_payout_{machine_id}", min_value=0, max_value=1000, value=0)
-            
+                coins_in_str = st.text_input("Coins In", key=f"coins_in_str_{machine_id}", value="")
+                toys_payout_str = st.text_input("Toys Payout", key=f"toys_payout_str_{machine_id}", value="")
+                coins_in = int(coins_in_str) if coins_in_str != "" else 0
+                toys_payout = int(toys_payout_str) if toys_payout_str != "" else 0
+
             with cols[2]:
                 param_strong_strength_value = machine.get('param_strong_strength', 0) if machine.get('param_strong_strength') is not None else 0    
                 param_strong_strength = st.number_input("Strong Strength", key=f"param_strong_strength_{machine_id}", min_value=0.0, max_value=50.0, step=0.2, value=param_strong_strength_value)
