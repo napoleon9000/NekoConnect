@@ -20,7 +20,7 @@ from app_pages.machines import app as machines_page
 from app_pages.record import app as record_page
 from app_pages.record_analyze import app as record_analyze_page
 from app_pages.edit_machine import app as edit_machine_page
-
+from app_pages.leaderboard import app as leaderboard_page
 
 logging.basicConfig(level=logging.INFO)
 
@@ -30,10 +30,10 @@ st.set_page_config(
     )
 
 st_secrets = dict(st.secrets)
-credentials = dict(st_secrets['credentials'])
+credentials = st.secrets["credentials"].to_dict()
 env = st_secrets['ENV']['ENV']
 
-if env != 'dev':
+if env != 'devv':
     authenticator = Authenticate(
         credentials,
         st_secrets['cookie']['name'],
@@ -43,6 +43,9 @@ if env != 'dev':
     )
 
     name, authentication_status, username = authenticator.login(key='Login', location='main')
+    st.session_state['authentication_status'] = authentication_status
+    st.session_state['name'] = name
+    st.session_state['username'] = username
 
 else:
     name = 'Dev'
@@ -69,6 +72,7 @@ if authentication_status:
     st.sidebar.button("Machines", on_click=switch_page, args=('machines',), use_container_width=True)
     st.sidebar.button("Add Record", on_click=switch_page, args=('record',), use_container_width=True)
     st.sidebar.button("Record Analyze", on_click=switch_page, args=('record_analyze',), use_container_width=True)
+    st.sidebar.button("Leaderboard", on_click=switch_page, args=('leaderboard',), use_container_width=True)
     st.sidebar.button("Edit Machine", on_click=switch_page, args=('edit_machine',), use_container_width=True)
 
 
@@ -163,6 +167,9 @@ if authentication_status:
 
     elif st.session_state['page'] == 'edit_machine':
         edit_machine_page()
+
+    elif st.session_state['page'] == 'leaderboard':
+        leaderboard_page()
 
 elif authentication_status == False:
     st.error('Username/password is incorrect')
