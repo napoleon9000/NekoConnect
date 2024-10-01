@@ -145,6 +145,22 @@ class Manager:
 
         return df[keys]
 
+    
+
+    def get_all_machines_payout_rate(self):
+        machines = self.get_all_machines_obj()
+        all_results = []
+        for machine in machines:
+            machine_id = machine.id
+            analyze_result, all_time_payout_rate, last_3_days_payout_rate = self.calculate_machine_payout_rate(machine_id)
+            all_results.append({
+                'machine_id': machine_id,
+                'analyze_result': analyze_result,
+                'all_time_payout_rate': all_time_payout_rate,
+                'last_3_days_payout_rate': last_3_days_payout_rate
+            })
+        return all_results
+
     def calculate_machine_payout_rate(self, machine_id):
         records = self.get_records_by_machine_id(machine_id)
         processed_records = []

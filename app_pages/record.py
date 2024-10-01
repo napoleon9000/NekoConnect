@@ -5,7 +5,7 @@ import traceback
 import logging
 import pytz
 from datetime import datetime
-
+import time
 from toy_record import Manager, Record
 
 logger = logging.getLogger(__name__)
@@ -115,6 +115,7 @@ def app():
             for machine in machines:
                 machine_id = machine['id']
                 save_record(machine_id, manager)
+                time.sleep(1)
 
         st.success("Record saved successfully!")
     
