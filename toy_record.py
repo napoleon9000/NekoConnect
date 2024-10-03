@@ -155,7 +155,7 @@ class Manager:
             analyze_result, all_time_payout_rate, last_3_days_payout_rate = self.calculate_machine_payout_rate(machine_id)
             all_results.append({
                 'machine_id': machine_id,
-                'analyze_result': analyze_result,
+                'last_day_payout_rate': analyze_result['daily_payout_rate'].iloc[-1],
                 'all_time_payout_rate': all_time_payout_rate,
                 'last_3_days_payout_rate': last_3_days_payout_rate
             })

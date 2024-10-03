@@ -1,9 +1,31 @@
 import streamlit as st
 import pandas as pd
 from dataclasses import dataclass
+import numpy as np
 
 from toy_record import Manager, Record
 import matplotlib.pyplot as plt
+
+def show_list(data, all_machines):
+    sorted_idx = np.argsort(data)
+    for idx in sorted_idx:
+        machine = all_machines[idx]
+        texts = f"**{machine.name}**: {data[idx]:.2f}"
+        if machine.notes is not None and machine.notes != "":
+            texts += f"  ({machine.notes})"
+        st.markdown(texts)
+
+def show_bar_chart(data, all_machines, title):
+    sorted_idx = np.argsort(data)[::-1]
+    labels = [all_machines[idx].name for idx in sorted_idx]
+    values = [data[idx] for idx in sorted_idx]
+    fig, ax = plt.subplots()
+    ax.barh(labels, values)
+    ax.set_xlabel('Payout Rate')
+    ax.set_ylabel('Machine')
+    ax.set_title(title)
+    
+    st.pyplot(fig)
 
 
 
@@ -14,69 +36,18 @@ def app():
     # show all machines and images
     env = st.secrets['ENV']['ENV']
     manager = Manager(env)
-    # all_results = manager.get_all_machines_payout_rate()
-    
-    # st.markdown("#### Individual Machine Analysis")
-    # for result in all_results:
-    #     cols = st.columns([1, 8])
-    #     machine_id = result['machine_id']
-    #     analyze_result, all_time_payout_rate, last_3_days_payout_rate = manager.calculate_machine_payout_rate(machine_id)
-    #     all_results.append(analyze_result)
-        
-    #     with cols[0]:
-    #         machine_image = manager.get_image_by_machine_id(machine_id)
-    #         name = machine.name
-    #         location = machine.location
-    #         st.image(machine_image, width=150)
-    #         if name is not None and name != "":
-    #             st.markdown(f"**Name:** {name}")
-    #         else:
-    #             st.markdown(f"**id:** {machine_id}")
-    #         if location is not None and location != "":
-    #             st.markdown(f"**Location:** {location}")
-    #         st.markdown(f"**All Time Payout Rate:** {all_time_payout_rate:.2f}")
-    #         st.markdown(f"**3-Day Payout Rate:** {last_3_days_payout_rate:.2f}") 
-    #         st.markdown(f"**Last Payout Rate:** {analyze_result['daily_payout_rate'].tolist()[-1]:.2f}") 
-    #         st.markdown(f"**Machine Params:** {machine.get_params()}")
+    all_results = manager.get_all_machines_payout_rate()
+    all_machines = manager.get_all_machines_obj()
 
-    #     with cols[1]:
-    #         manager.plot_analyze_result(analyze_result)
-        
-    #     with st.expander("Detail Records", expanded=False):
-    #         df = manager.get_records_by_machine_id(machine_id)
-    #         st.dataframe(df)
-        
-    #     st.markdown("---")
+    last_day_payout_rate = [result['last_day_payout_rate'] for result in all_results]
+    all_time_payout_rate = [result['all_time_payout_rate'] for result in all_results]
+    last_3_days_payout_rate = [result['last_3_days_payout_rate'] for result in all_results]
 
-    # st.markdown("#### Overall Analysis")
+    show_bar_chart(last_day_payout_rate, all_machines, "Last Day Payout Rate")
+    show_bar_chart(last_3_days_payout_rate, all_machines, "Last 3 Days Payout Rate")
+    show_bar_chart(all_time_payout_rate, all_machines, "All Time Payout Rate")
 
-    # # plot
-    # df1, df2 = manager.plot_overall_analyze_result(all_results)
 
-    # cols = st.columns(2)
-    # with cols[0]:
-    #     st.markdown("##### Coins In & Toys Payout")
-    #     fig, ax = plt.subplots()
-    #     df1['date'] = pd.to_datetime(df1['date'])
-    #     df1['day_of_week'] = df1['date'].dt.strftime('%a')
-    #     df1['date_with_day'] = df1['date'].dt.strftime('%m-%d') + '_' + df1['day_of_week']
-    #     df1.plot(x='date_with_day', y=['daily_coins_in', 'daily_toys_payout'], ax=ax, style='-o')
-    #     ax.set_title('Coins In & Toys Payout')
-    #     st.pyplot(fig)
-    #     with st.expander("Detail Records", expanded=False):
-    #         st.dataframe(df1)
-    # with cols[1]:
-    #     st.markdown("##### Payout Rate")
-    #     fig, ax = plt.subplots()
-    #     df2['date'] = pd.to_datetime(df2['date'])
-    #     df2['day_of_week'] = df2['date'].dt.strftime('%a')
-    #     df2['date_with_day'] = df2['date'].dt.strftime('%m-%d') + '_' + df2['day_of_week']
-    #     df2.plot(x='date_with_day', y='daily_payout_rate', ax=ax, style='-o')
-    #     ax.set_title('Payout Rate')
-    #     ax.set_ylim(0, 15)
-    #     st.pyplot(fig)
-    #     with st.expander("Detail Records", expanded=False):
-    #         st.dataframe(df2)
 
 if __name__ == "__main__":
     app()

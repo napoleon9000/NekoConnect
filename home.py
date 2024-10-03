@@ -33,8 +33,8 @@ st_secrets = dict(st.secrets)
 credentials = st.secrets["credentials"].to_dict()
 env = st_secrets['ENV']['ENV']
 
-if env != 'devv':
-    authenticator = Authenticate(
+if env != 'dev':
+    authenticator = Authenticate( 
         credentials,
         st_secrets['cookie']['name'],
         st_secrets['cookie']['key'],
