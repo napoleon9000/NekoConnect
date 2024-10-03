@@ -43,9 +43,13 @@ def app():
     all_time_payout_rate = [result['all_time_payout_rate'] for result in all_results]
     last_3_days_payout_rate = [result['last_3_days_payout_rate'] for result in all_results]
 
-    show_bar_chart(last_day_payout_rate, all_machines, "Last Day Payout Rate")
-    show_bar_chart(last_3_days_payout_rate, all_machines, "Last 3 Days Payout Rate")
-    show_bar_chart(all_time_payout_rate, all_machines, "All Time Payout Rate")
+    col1, col2 = st.columns(2)
+    with col1:
+        show_bar_chart(last_day_payout_rate, all_machines, "Last Day Payout Rate")
+    with col2:
+        show_bar_chart(last_3_days_payout_rate, all_machines, "Last 3 Days Payout Rate")
+    with col1:
+        show_bar_chart(all_time_payout_rate, all_machines, "All Time Payout Rate")
 
 
 
