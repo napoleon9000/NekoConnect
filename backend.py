@@ -41,7 +41,7 @@ class Manager:
         registration_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         user_uuid = str(uuid.uuid4())
         user = User(user_uuid, phone_number, registration_date, name=name, credits=credits, notes=notes)
-        self.users_table.insert(user.__dict__)
+        self.users_table.upsert(user.__dict__, Query().phone_number == phone_number)
         self.db.save()
 
     # Edit user information
