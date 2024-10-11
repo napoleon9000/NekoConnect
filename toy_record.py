@@ -240,6 +240,7 @@ class Manager:
             fig, ax = plt.subplots()
             combined_df.plot(x='date_with_day', y=['daily_coins_in', 'daily_toys_payout'], ax=ax, style='-o')
             ax.set_title('Coins In & Toys Payout')
+            ax.grid(True)
             st.pyplot(fig)
             st.write('coins in & toys payout')
         
@@ -253,6 +254,7 @@ class Manager:
             analyze_result_df.plot(x='date_with_day', y='daily_payout_rate', ax=ax, style='-o')
             ax.set_title('Payout Rate')
             ax.set_ylim(0, 15)
+            ax.grid(True)
             st.pyplot(fig)
             st.write('payout rate')
 
