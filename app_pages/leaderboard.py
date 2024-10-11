@@ -27,6 +27,9 @@ def show_bar_chart(data, all_machines, title):
     ax.grid(True)
     st.pyplot(fig)
 
+    data_df = pd.DataFrame({'Machine': labels, 'Payout Rate': values})
+    return data_df
+
 
 
 def app():
@@ -45,11 +48,19 @@ def app():
 
     col1, col2 = st.columns(2)
     with col1:
-        show_bar_chart(last_day_payout_rate, all_machines, "Last Day Payout Rate")
+        data_df = show_bar_chart(last_day_payout_rate, all_machines, "Last Day Payout Rate")
+        with st.expander("Detail", expanded=False):
+            st.dataframe(data_df)
+
     with col2:
-        show_bar_chart(last_3_days_payout_rate, all_machines, "Last 3 Days Payout Rate")
+        data_df = show_bar_chart(last_3_days_payout_rate, all_machines, "Last 3 Days Payout Rate")
+        with st.expander("Detail", expanded=False):
+            st.dataframe(data_df)
+
     with col1:
-        show_bar_chart(all_time_payout_rate, all_machines, "All Time Payout Rate")
+        data_df = show_bar_chart(all_time_payout_rate, all_machines, "All Time Payout Rate")
+        with st.expander("Detail", expanded=False):
+            st.dataframe(data_df)
 
 
 
