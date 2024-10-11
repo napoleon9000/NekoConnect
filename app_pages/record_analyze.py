@@ -63,6 +63,7 @@ def app():
         df1['date_with_day'] = df1['date'].dt.strftime('%m-%d') + '_' + df1['day_of_week']
         df1.plot(x='date_with_day', y=['daily_coins_in', 'daily_toys_payout'], ax=ax, style='-o')
         ax.set_title('Coins In & Toys Payout')
+        ax.grid(True)
         st.pyplot(fig)
         with st.expander("Detail Records", expanded=False):
             st.dataframe(df1)
@@ -75,6 +76,7 @@ def app():
         df2.plot(x='date_with_day', y='daily_payout_rate', ax=ax, style='-o')
         ax.set_title('Payout Rate')
         ax.set_ylim(0, 15)
+        ax.grid(True)
         st.pyplot(fig)
         with st.expander("Detail Records", expanded=False):
             st.dataframe(df2)

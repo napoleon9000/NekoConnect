@@ -23,6 +23,8 @@ def save_record(machine_id, manager: Manager):
     param_award_interval = st.session_state[f"param_award_interval_{machine_id}"]
     param_mode = st.session_state[f"param_mode_{machine_id}"]
     notes = st.session_state[f"notes_{machine_id}"]
+    if coins_in == 0 or toys_payout == 0:
+        st.error("Coins in and toys payout cannot be 0! Please check your input and try again.")
     try:
         record = Record(
             date=date_str,

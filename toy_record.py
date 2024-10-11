@@ -257,7 +257,12 @@ class Manager:
             st.write('payout rate')
 
     def plot_overall_analyze_result(self, all_results):
-        all_dates = all_results[0]['date']
+        n_days_to_plot = 30
+        if len(all_results[0]['date']) > n_days_to_plot:
+            all_dates = all_results[0]['date'][-n_days_to_plot:]
+        else:
+            all_dates = all_results[0]['date']
+
         data_by_date = {k: {
             'daily_payout_rate': [],    
             'daily_coins_in': [],

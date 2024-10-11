@@ -24,7 +24,7 @@ def show_bar_chart(data, all_machines, title):
     ax.set_xlabel('Payout Rate')
     ax.set_ylabel('Machine')
     ax.set_title(title)
-    
+    ax.grid(True)
     st.pyplot(fig)
 
 
