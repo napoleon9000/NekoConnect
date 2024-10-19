@@ -79,3 +79,4 @@ venv.bak/
 # mypy
 .mypy_cache/
 toy_record_db_dev.json
+.streamlit/firestore_key.json

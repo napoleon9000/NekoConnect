@@ -109,6 +109,7 @@ if authentication_status:
                     search_phone = ""
             if search_phone:
                 all_info = all_info[all_info['phone_number'] == search_phone]
+                all_info = all_info.reset_index(drop=True)
             
             st.markdown("---")
             col1, col2, col3 = st.columns([1, 1, 5])
