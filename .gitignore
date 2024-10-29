@@ -80,3 +80,4 @@ venv.bak/
 .mypy_cache/
 toy_record_db_dev.json
 .streamlit/firestore_key.json
+data/nekoconnect_db_dev.json
