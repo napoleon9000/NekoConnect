@@ -69,7 +69,7 @@ if authentication_status:
     st.sidebar.button("Add New User", on_click=switch_page, args=('add_new_user',), use_container_width=True)
     st.sidebar.button("Edit User", on_click=switch_page, args=('edit_user',), use_container_width=True)
     # st.sidebar.button("Machines", on_click=switch_page, args=('machines',), use_container_width=True)
-    # st.sidebar.button("Add Record", on_click=switch_page, args=('record',), use_container_width=True)
+    st.sidebar.button("Add Machine Record", on_click=switch_page, args=('record',), use_container_width=True)
     # st.sidebar.button("Record Analyze", on_click=switch_page, args=('record_analyze',), use_container_width=True)
     # st.sidebar.button("Leaderboard", on_click=switch_page, args=('leaderboard',), use_container_width=True)
     # st.sidebar.button("Edit Machine", on_click=switch_page, args=('edit_machine',), use_container_width=True)

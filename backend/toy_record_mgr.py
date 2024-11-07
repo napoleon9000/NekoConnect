@@ -1,8 +1,9 @@
 from typing import Optional
 from dataclasses import dataclass
 from tinydb import Query
-from db.toy_record_db import BlobDB
-from db.firestore import FirestoreDB
+from models.machines import Record, Machine
+from backend.base_manager import Manager as BaseManager
+from utils import get_image_by_path
 from io import BytesIO
 import streamlit as st
 import uuid
@@ -11,60 +12,39 @@ from datetime import datetime
 import pandas as pd
 import logging
 from dataclasses import asdict
-
+from models.machines import IncomeRecord
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class Record:
-    machine_id: str
-    coins_in: int
-    toys_payout: int
-    param_strong_strength: float
-    param_medium_strength: float
-    param_weak_strength: float
-    param_award_interval: int
-    param_mode: str = ''
-    notes: Optional[str] = None
-    date: str = field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    id: str = field(default_factory=lambda: str(uuid.uuid4()))
-
-@dataclass
-class Machine:
-    name: str
-    location: str
-    status: str
-    param_strong_strength: float
-    param_medium_strength: float
-    param_weak_strength: float
-    param_award_interval: int
-    param_mode: str = ''
-    id: str = None
-    notes: Optional[str] = None
-    image: Optional[str] = None   # path to image
-
-    def get_params(self):
-        """Summary of the machine parameters"""
-        try:
-            results = f'{self.param_strong_strength}, {self.param_medium_strength}, {self.param_weak_strength} | {self.param_award_interval}, {self.param_mode}'
-            return results
-        except Exception as e:
-            return None
-
-@st.cache_data
-def get_image_by_path(path, _db):
-    image = _db.download_file(path)
-    return image
-
-
-class Manager:
+class Manager(BaseManager):
     def __init__(self, env):
-        self.blob_db = BlobDB(env)
-        self.firestore_db = FirestoreDB(env)
+        super().__init__(env)
+
+    def create_income_record(self, date: str, POS_machine: int, auto_machine: int):
+        record = IncomeRecord(date=date, POS_machine=POS_machine, auto_machine=auto_machine, total=0)
+        self.firestore_db.create_income_record(asdict(record))
+    
+    def get_all_income_records(self):
+        records = self.firestore_db.get_all_income_records()
+        df = pd.DataFrame(records)
+        if df.empty:
+            return None
+        df['date'] = pd.to_datetime(df['date']).dt.strftime("%Y-%m-%d")
+        df = df.sort_values(by='date', ascending=True)
+        auto_machine_records = df['auto_machine'].tolist()
+        diff_records = [auto_machine_records[0]]
+        for i in range(1, len(auto_machine_records)):
+            if auto_machine_records[i] < auto_machine_records[i-1]:
+                diff_records.append(auto_machine_records[i])
+            else:
+                diff_records.append(auto_machine_records[i] - auto_machine_records[i-1])
+        df['auto_machine'] = pd.Series(diff_records)
+        df['total'] = df['POS_machine'] + df['auto_machine']
+        selected_columns = ['date', 'POS_machine', 'auto_machine', 'total']
+        return df[selected_columns]
+
 
     def create_machine(self, machine: Machine, image: BytesIO):
-        logger.info("create_machine")
-        logger.info(machine)
         if image is not None:
             # upload image to blob storage
             image_path = f"images/machines/{machine.id}.jpg"
@@ -74,7 +54,11 @@ class Manager:
         self.firestore_db.create_machine(asdict(machine))
 
     def get_all_machines(self):
-        return self.firestore_db.get_all_machines()
+        all_machines = self.firestore_db.get_all_machines()
+        # sort by id, only keep the numbers in the id
+        numbers = '1234567890'
+        all_machines = sorted(all_machines, key=lambda x: int(''.join(filter(lambda c: c in numbers, x['id']))))
+        return all_machines
 
     def get_all_machines_obj(self):
         machines = self.get_all_machines()
